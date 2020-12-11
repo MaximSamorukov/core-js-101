@@ -115,51 +115,119 @@ function fromJSON(proto, json) {
 
 const cssSelectorBuilder = {
   element(value) {
-    this.str = `${value}`;
-    return this;
+    if (this.root && this.root.includes('element')) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    if (this.root) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    const { ...ob } = { ...this };
+    ob.str = ob.str ? `${ob.str}${value}` : `${value}`;
+    ob.elemen = value;
+    ob.root += ' element';
+    ob.stringify = () => ['elemen'].reduce((acc, i) => {
+      if (!ob[i]) {
+        return acc;
+      }
+      return acc + ob[i];
+    }, '');
+    return { ...ob };
   },
 
   id(value) {
-    this.str += `#${value}`;
-    return this;
+    if (this.root && this.root.includes('id')) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    if (this.root && (this.root.includes('class') || this.root.includes('pseudo-element'))) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    const { ...ob } = { ...this };
+    ob.str = ob.str ? `${ob.str}#${value}` : `#${value}`;
+    ob.root += ' id';
+    ob.idd = `#${value}`;
+    ob.stringify = () => ['elemen', 'idd'].reduce((acc, i) => {
+      if (!ob[i]) {
+        return acc;
+      }
+      return acc + ob[i];
+    }, '');
+    return { ...ob };
   },
 
   class(value) {
-    this.str += `.${value}`;
-    return this;
+    if (this.root && this.root.includes('attr')) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    const { ...ob } = { ...this };
+    ob.str = ob.str ? `${ob.str}.${value}` : `.${value}`;
+    ob.root += ' class';
+    ob.clas = ob.clas ? `${ob.clas}.${value}` : `.${value}`;
+    ob.stringify = () => ['elemen', 'idd', 'clas', 'attrr', 'pseudoCl', 'pseudoEl'].reduce((acc, i) => {
+      if (!ob[i]) {
+        return acc;
+      }
+      return acc + ob[i];
+    }, '');
+    return { ...ob };
   },
 
   attr(value) {
-    this.str += `[${value}]`;
-    return this;
+    if (this.root && this.root.includes('pseudo-class')) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    const { ...ob } = { ...this };
+    ob.str = ob.str ? `${ob.str}[${value}]` : `[${value}]`;
+    ob.attrr = ob.attrr ? `${ob.attrr}[${value}]` : `[${value}]`;
+    ob.root += ' attr';
+    ob.stringify = () => ['elemen', 'idd', 'clas', 'attrr', 'pseudoCl', 'pseudoEl'].reduce((acc, i) => {
+      if (!ob[i]) {
+        return acc;
+      }
+      return acc + ob[i];
+    }, '');
+    return { ...ob };
   },
 
   pseudoClass(value) {
-    this.str += `:${value}`;
-    return this;
+    if (this.root && this.root.includes('pseudo-element')) {
+      throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+    }
+    const { ...ob } = { ...this };
+    ob.str = ob.str ? `${ob.str}:${value}` : `:${value}`;
+    ob.pseudoCl = ob.pseudoCl ? `${ob.pseudoCl}:${value}` : `:${value}`;
+    ob.root += ' pseudo-class';
+    ob.stringify = () => ['elemen', 'idd', 'clas', 'attrr', 'pseudoCl', 'pseudoEl'].reduce((acc, i) => {
+      if (!ob[i]) {
+        return acc;
+      }
+      return acc + ob[i];
+    }, '');
+    return { ...ob };
   },
 
   pseudoElement(value) {
-    this.str += `::${value}`;
-    return this;
+    if (this.root && this.root.includes('pseudo-element')) {
+      throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector');
+    }
+    const { ...ob } = { ...this };
+    ob.str = ob.str ? `${ob.str}::${value}` : `::${value}`;
+    ob.root += ' pseudo-element';
+    ob.pseudoEl = `::${value}`;
+    ob.stringify = () => ['elemen', 'idd', 'clas', 'attrr', 'pseudoCl', 'pseudoEl'].reduce((acc, i) => {
+      if (!ob[i]) {
+        return acc;
+      }
+      return acc + ob[i];
+    }, '');
+    return { ...ob };
   },
 
   combine(selector1, combinator, selector2) {
-    const str1 = selector1.str;
-    const str2 = selector2.str;
-    // console.log(`>>>> ${str1}`);
-    // console.log(`>>>>>> ${str2}`);
-    // console.log(selector2.stringify());
-    // console.log(str2);
-    this.str = `${str1} ${combinator} ${str2}`;
-    return this;
+    const { ...ob } = { ...this };
+    ob.str = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    ob.stringify = () => ob.str;
+    return { ...ob };
   },
-};
-cssSelectorBuilder.stringify = function () {
-  const st = this.str;
-  // console.log(st);
-  this.str = '';
-  return st;
 };
 
 module.exports = {
