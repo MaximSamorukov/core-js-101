@@ -130,8 +130,16 @@ function isTriangle(a, b, c) {
  *   { top:20, left:20, width: 20, height: 20 }    =>  false
  *
  */
-function doRectanglesOverlap(/* rect1, rect2 */) {
-  throw new Error('Not implemented');
+function doRectanglesOverlap(r1, r2) {
+  const fCPX = r1.left + (r1.width / 2);
+  const fCPY = r1.top + (r1.height / 2);
+  const sCPX = r2.left + (r2.width / 2);
+  const sCPY = r2.top + (r2.height / 2);
+  const xdist = (r1.width + r2.width) / 2;
+  const ydist = (r1.height + r2.height) / 2;
+  const xRes = Math.abs(sCPX - fCPX) <= xdist;
+  const yRes = Math.abs(sCPY - fCPY) <= ydist;
+  return xRes && yRes;
 }
 
 
@@ -282,8 +290,21 @@ function reverseInteger(num) {
  *   5436468789016589 => false
  *   4916123456789012 => false
  */
-function isCreditCardNumber(/* ccn */) {
-  throw new Error('Not implemented');
+function isCreditCardNumber(ccn) {
+  const strCcn = `${ccn}`;
+  const xNum = parseInt(strCcn.split('')[strCcn.split('').length - 1], 10);
+  let sum = strCcn.split('').reverse().reduce((acc, i, ind) => {
+    if (ind === 0) {
+      return acc;
+    }
+    if (ind % 2 !== 0) {
+      const a = (parseInt(i, 10) * 2) > 9 ? (parseInt(i, 10) * 2) - 9 : (parseInt(i, 10) * 2);
+      return acc + a;
+    }
+    return acc + parseInt(i, 10);
+  }, 0);
+  sum = (sum * 9) % 10;
+  return sum === xNum;
 }
 
 /**
@@ -329,8 +350,39 @@ function getDigitalRoot(num) {
  *   '{)' = false
  *   '{[(<{[]}>)]}' = true
  */
-function isBracketsBalanced(/* str */) {
-  throw new Error('Not implemented');
+function isBracketsBalanced(str) {
+  if (str.length === 0) {
+    return true;
+  }
+  if (str.split('').length % 2 !== 0) {
+    return false;
+  }
+  const openBrackets = ['(', '[', '{', '<'];
+  const closeBrackets = [')', ']', '}', '>'];
+  const openBracketsStr = openBrackets.join('');
+  const closeBracketsStr = closeBrackets.join('');
+
+  if (closeBracketsStr.includes(str[0])) {
+    return false;
+  }
+  if (openBracketsStr.includes(str.split('')[this.length - 1])) {
+    return false;
+  }
+  const result = str.split('').reduce((acc, i) => {
+    if (openBracketsStr.includes(i)) {
+      acc.push(i);
+      return acc;
+    }
+    if (acc[acc.length - 1] === openBrackets[closeBrackets.indexOf(i)]) {
+      acc.pop();
+      return acc;
+    }
+    return acc;
+  }, []);
+  if (result.length > 0) {
+    return false;
+  }
+  return true;
 }
 
 
@@ -371,8 +423,20 @@ function toNaryString(num, n) {
  *   ['/web/assets/style.css', '/.bin/mocha',  '/read.me'] => '/'
  *   ['/web/favicon.ico', '/web-scripts/dump', '/webalizer/logs'] => '/'
  */
-function getCommonDirectoryPath(/* pathes */) {
-  throw new Error('Not implemented');
+function getCommonDirectoryPath(pathes) {
+  const working = pathes[0];
+  const strResult = working.split('/').reduce((acc, i, ind) => {
+    const str = pathes.map((ix) => ix.split('/')[ind] === i).filter((fi) => fi !== false).length === pathes.length;
+    if (str) {
+      acc.push(i);
+      return acc;
+    }
+    return acc;
+  }, []);
+  if (strResult.length === 0) {
+    return '';
+  }
+  return `${strResult.join('/')}/`;
 }
 
 
@@ -394,8 +458,13 @@ function getCommonDirectoryPath(/* pathes */) {
  *                         [ 6 ]]
  *
  */
-function getMatrixProduct(/* m1, m2 */) {
-  throw new Error('Not implemented');
+function getMatrixProduct(m1, m2) {
+  return m1.map((i) => i.reduce((acc, ii, ind) => {
+    acc[0] += ii * m2[ind][0];
+    acc[1] += ii * m2[ind][1];
+    acc[2] += ii * m2[ind][2];
+    return acc.filter((y) => !Number.isNaN(y));
+  }, [0, 0, 0]));
 }
 
 
@@ -429,8 +498,53 @@ function getMatrixProduct(/* m1, m2 */) {
  *    [    ,   ,    ]]
  *
  */
-function evaluateTicTacToePosition(/* position */) {
-  throw new Error('Not implemented');
+function evaluateTicTacToePosition(position) {
+  const x = 'XXX';
+  const o = '000';
+  const arr = position.reduce((acc, i, ind) => {
+    if (ind === 0) {
+      acc.h1 += i.join('');
+      acc.v1 += i[0];
+      acc.v2 += i[1];
+      acc.v3 += i[2];
+      acc.d1 += i[2];
+      acc.d2 += i[0];
+      return acc;
+    }
+    if (ind === 1) {
+      acc.h2 += i.join('');
+      acc.v1 += i[0];
+      acc.v2 += i[1];
+      acc.v3 += i[2];
+      acc.d1 += i[1];
+      acc.d2 += i[1];
+      return acc;
+    }
+    if (ind === 2) {
+      acc.h3 += i.join('');
+      acc.v1 += i[0];
+      acc.v2 += i[1];
+      acc.v3 += i[2];
+      acc.d1 += i[0];
+      acc.d2 += i[2];
+      return acc;
+    }
+    return acc;
+  }, {
+    h1: '',
+    h2: '',
+    h3: '',
+    v1: '',
+    v2: '',
+    v3: '',
+    d1: '',
+    d2: '',
+  });
+  const result = Object.keys(arr).map((i) => arr[i]).filter((i) => (i === x || i === o));
+  if (result.length === 0) {
+    return undefined;
+  }
+  return result[0].split('')[0];
 }
 
 
