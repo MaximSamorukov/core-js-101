@@ -30,18 +30,18 @@
  */
 function willYouMarryMe(pos) {
   const positive = Promise.resolve('Hooray!!! She said "Yes"!');
-  const negative = Promise.reject(new Error('Oh no, she said "No".'));
-  const err = Promise.catch(() => 'Wrong parameter is passed! Ask her again.');
-  if (pos) {
+  const negative = Promise.resolve('Oh no, she said "No".');
+  // const err = Promise.catch(() => 'Wrong parameter is passed! Ask her again.');
+  if (pos === true) {
     return positive;
   }
   if (pos === false) {
     return negative;
   }
-  if (!pos) {
-    throw new Error(err);
+  if (pos !== true && pos !== false) {
+    return Promise.reject(new Error('Wrong parameter is passed! Ask her again.'));
   }
-  return '';
+  return Promise.reject(new Error('Wrong parameter is passed! Ask her again.'));
 }
 
 
@@ -104,8 +104,10 @@ function getFastestPromise(array) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+function chainPromises(array, action) {
+  return array.reduce((acc, i) => acc.then((cca) => i.then((ii) => Promise.resolve(action(cca, ii)))
+    .catch(() => Promise.resolve(cca)))
+    .catch((e) => e));
 }
 
 module.exports = {
