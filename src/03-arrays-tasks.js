@@ -476,17 +476,14 @@ function sortCitiesArray(arr) {
  *           [0,0,0,0,1]]
  */
 function getIdentityMatrix(n) {
-  return Array.from({ length: n }).map((i, ind) => {
-    console.log(i);
-    return Array.from({ length: n }).map((ii, index) => {
-      if (ind === index) {
-        const iii = 1;
-        return iii;
-      }
-      const iiii = 0;
-      return iiii;
-    });
-  });
+  return Array.from({ length: n }).map((i, ind) => Array.from({ length: n }).map((ii, index) => {
+    if (ind === index) {
+      const iii = 1;
+      return iii;
+    }
+    const iiii = 0;
+    return iiii;
+  }));
 }
 
 /**

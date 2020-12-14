@@ -316,7 +316,6 @@ function getCardId(value) {
   }
 
   if (!Number.isNaN(parseInt(first, 10))) {
-    console.log('+');
     return (parseInt(first, 10) - 1) + (13 * obj1[second.codePointAt(0)]);
   }
   return (obj[first] + (13 * obj1[second.codePointAt(0)]));
